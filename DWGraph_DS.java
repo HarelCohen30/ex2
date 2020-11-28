@@ -5,11 +5,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 
+
 public class DWGraph_DS implements directed_weighted_graph {
 
 	private HashMap<Integer, node_data> vertices;
 	public Collection<node_data> GraphVertices;
 	int amountOfEdges = 0;
+	int edgeCounter=0;
 	int mc = 0;
 
 	//empty constructor
@@ -63,19 +65,36 @@ public class DWGraph_DS implements directed_weighted_graph {
 	}
 
 	public void connect(int src, int dest, double w) {
-		// TODO Auto-generated method stub
-
+		if(vertices.containsKey(src) && vertices.containsKey(dest) && src!=dest ){
+			if(!hasEdge(src, dest)) {
+				((NodeData) vertices.get(src)).addNi(vertices.get(dest));
+				edgeCounter++;
+				mc++;
+			}	
+			else {
+				EdgeData edge = new EdgeData(src,dest);
+				edge.setWeight(w);
+			}
+		}
 	}
 
-	public Collection getV() {
-		// TODO Auto-generated method stub
-		return null;
+	public Collection <node_data> getV() {
+		return vertices.values();
 	}
 
-	public Collection getE(int node_id) {
-		// TODO Auto-generated method stub
-		return null;
+	public Collection <edge_data> getE(int node_id) {
+		NodeData src = (NodeData) vertices.get(node_id);
+		Collection<edge_data> coll = new  ArrayList<edge_data>();
+		Iterator<node_data> iter = src.getNi().iterator();
+		while (iter.hasNext())
+		{
+			node_data b = iter.next();
+			edge_data edge = new EdgeData(node_id,b.getKey());
+			coll.add(edge);
+		}
+		return coll;
 	}
+
 
 	public node_data removeNode(int key) {
 		// TODO Auto-generated method stub
@@ -88,18 +107,15 @@ public class DWGraph_DS implements directed_weighted_graph {
 	}
 
 	public int nodeSize() {
-		// TODO Auto-generated method stub
-		return 0;
+		return vertices.size();
 	}
 
 	public int edgeSize() {
-		// TODO Auto-generated method stub
-		return 0;
+		return edgeCounter;
 	}
 
 	public int getMC() {
-		// TODO Auto-generated method stub
-		return 0;
+		return mc;
 	}
 
 	public boolean hasEdge(int node1, int node2) {/////////////////

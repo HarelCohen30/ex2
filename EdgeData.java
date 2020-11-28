@@ -48,5 +48,9 @@ public class EdgeData implements edge_data {
 	public void setTag(int t) {
 		this.tag=t;
 	}
-
+	
+	public void setWeight(double w) {
+		this.weight=w;
+	}
+	
 }
