@@ -8,20 +8,21 @@ import java.util.Iterator;
 
 public class DWGraph_DS implements directed_weighted_graph {
 
-	private HashMap<Integer, node_data> vertices;
+	private HashMap<Integer, node_data> src_vertices;
+	private HashMap<Integer, node_data> dest_vertices;
 	public Collection<node_data> GraphVertices;
-	int amountOfEdges = 0;
+	int nodeCounter = 0;
 	int edgeCounter=0;
 	int mc = 0;
 
 	//empty constructor
 	public DWGraph_DS() {
-		this.vertices = new HashMap<Integer, node_data>();
+		this.src_vertices = new HashMap<Integer, node_data>();
+		this.dest_vertices = new HashMap<Integer, node_data>();
 		this.GraphVertices = new ArrayList<node_data>();
-		this.amountOfEdges = 0;
 	}
-
-
+	/*
+	//Maurice, Please check this constructor again/////////////////////////////
 	//constructor for the copy function creating a deep copy
 	public DWGraph_DS(Collection<node_data> NewGraphVertices) {
 		this.GraphVertices = NewGraphVertices;
@@ -41,12 +42,14 @@ public class DWGraph_DS implements directed_weighted_graph {
 			}
 		}
 	}
-
+	 */
 
 
 	public node_data getNode(int key) {
-		if (vertices.get(key) != null)
-			return vertices.get(key);
+		if (src_vertices.get(key) != null)
+			return src_vertices.get(key);
+		else if (dest_vertices.get(key) != null)
+			return dest_vertices.get(key);
 		else return null;
 	}
 
@@ -60,14 +63,25 @@ public class DWGraph_DS implements directed_weighted_graph {
 	}
 
 	public void addNode(node_data n) {
-		if (!vertices.containsValue(n) && n != null)
-			vertices.put(n.getKey(), n);
+		boolean ForCountNodes=false;
+		if (!src_vertices.containsValue(n) && n != null)
+		{
+			src_vertices.put(n.getKey(), n);
+			ForCountNodes=true;
+		}
+		if (!dest_vertices.containsValue(n) && n != null)
+		{
+			dest_vertices.put(n.getKey(), n);
+			ForCountNodes=true;
+		}
+		if (ForCountNodes)//the node added to graph
+			nodeCounter++;
 	}
 
 	public void connect(int src, int dest, double w) {
-		if(vertices.containsKey(src) && vertices.containsKey(dest) && src!=dest ){
+		if(src_vertices.containsKey(src) && dest_vertices.containsKey(dest) && src!=dest ){
 			if(!hasEdge(src, dest)) {
-				((NodeData) vertices.get(src)).addNi(vertices.get(dest));
+				((NodeData) src_vertices.get(src)).addNi(dest_vertices.get(dest));
 				edgeCounter++;
 				mc++;
 			}	
@@ -79,11 +93,15 @@ public class DWGraph_DS implements directed_weighted_graph {
 	}
 
 	public Collection <node_data> getV() {
-		return vertices.values();
+		if (src_vertices.size() > dest_vertices.size())
+		{
+			return src_vertices.values();
+		}
+		return dest_vertices.values();
 	}
 
 	public Collection <edge_data> getE(int node_id) {
-		NodeData src = (NodeData) vertices.get(node_id);
+		NodeData src = (NodeData) src_vertices.get(node_id);
 		Collection<edge_data> coll = new  ArrayList<edge_data>();
 		Iterator<node_data> iter = src.getNi().iterator();
 		while (iter.hasNext())
@@ -95,19 +113,48 @@ public class DWGraph_DS implements directed_weighted_graph {
 		return coll;
 	}
 
+	//Maurice, Please check this method again/////////////////////////////
+	public node_data removeNode(int key){
+		if (src_vertices.containsKey(key))
+		{
+			NodeData nodeToRemove = (NodeData) src_vertices.get(key);
+			Collection<node_data> neighborsOfDel = nodeToRemove.getNi();
+			for (node_data neighbor : neighborsOfDel)
+			{
+				NodeData Ni = (NodeData) neighbor;
+				Ni.removeNode(nodeToRemove);
+				edgeCounter--;
+			}
+			NodeData nodeToRemove2 = (NodeData) dest_vertices.get(key);
+			Collection<node_data> neighborsOfDel2 = nodeToRemove2.getNi();
+			for (node_data neighbor : neighborsOfDel2)
+			{
+				NodeData Ni = (NodeData) neighbor;
+				Ni.removeNode(nodeToRemove2);
+				edgeCounter--;
+			}
+			src_vertices.remove(key);
+			dest_vertices.remove(key);
+			neighborsOfDel.clear();
+			neighborsOfDel2.clear();
+			mc++;
+			return nodeToRemove;
+		} 
+		else return null;
 
-	public node_data removeNode(int key) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	public edge_data removeEdge(int src, int dest) {
-		// TODO Auto-generated method stub
+		if (src != dest && getNode(src) != null && getNode(dest) != null && hasEdge(src, dest)) {
+			((NodeData) src_vertices.get(src)).removeNode(getNode(dest));
+			edgeCounter--;
+			mc++;
+		}
 		return null;
 	}
 
 	public int nodeSize() {
-		return vertices.size();
+		return nodeCounter;
 	}
 
 	public int edgeSize() {
@@ -118,9 +165,9 @@ public class DWGraph_DS implements directed_weighted_graph {
 		return mc;
 	}
 
-	public boolean hasEdge(int node1, int node2) {/////////////////
-		if (vertices.get(node1) == null || vertices.get(node2) == null || node1 == node2) return false;
-		if (((NodeData) vertices.get(node1)).hasNi(node2) && (((NodeData) vertices.get(node2)).hasNi(node1)))
+	public boolean hasEdge(int src, int dest) {
+		if (src_vertices.get(src) == null || dest_vertices.get(dest) == null || src == dest) return false;
+		if (((NodeData) src_vertices.get(src)).hasNi(dest))
 			return true;
 		return false;
 	}

@@ -66,7 +66,6 @@ public class NodeData implements node_data{
 
 	
 	public Collection<node_data> getNi() {
-		
 		return neighbor.values();
 	}
 
