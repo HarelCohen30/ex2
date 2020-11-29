@@ -35,7 +35,7 @@ public class DWGraph_DS implements directed_weighted_graph {
 		{
 			verts.setInfo(verts.getInfo());
 			verts.setTag(verts.getTag());
-			Iterator<node_data> ite = getV(verts.getKey()).iterator();
+			Iterator<node_data> ite = (verts.getKey().getNi).iterator();
 			while(ite.hasNext()) {
 				node_data N=ite.next();
 				connect(verts.getKey(),N.getKey(),((NodeData)verts).getWeight(N.getKey()));
