@@ -24,21 +24,23 @@ public class DWGraph_DS implements directed_weighted_graph {
 	
 	//Maurice, Please check this constructor again/////////////////////////////
 	//constructor for the copy function creating a deep copy
-	public DWGraph_DS(Collection<node_data> NewGraphVertices) {
-		this.GraphVertices = NewGraphVertices;
-		this.vertices = new HashMap<Integer, node_data>();
-		for (node_data verts : GraphVertices) {
+	public DWGraph_DS(Collection<node_data> NewGraphSrcVertices, Collection<node_data> NewGraphDestVertices) {
+		this.GraphSrcVertices = NewGraphSrcVertices;
+		this.GraphDestVertices = NewGraphDestVertices;
+		this.src_vertices = new HashMap<Integer, node_data>();
+		this.dest_vertices = new HashMap<Integer, node_data>();
+		for (node_data verts : GraphSrcVertices) {
 			addNode(verts);
 		}
 		this.amountOfEdges = this.getNeighbors().size();
-		for (node_data verts : GraphVertices)
+		for (node_data verts : GraphSrcVertices)
 		{
 			verts.setInfo(verts.getInfo());
 			verts.setTag(verts.getTag());
 			Iterator<node_data> ite = (verts.getKey().getNi).iterator();
 			while(ite.hasNext()) {
 				node_data N=ite.next();
-				connect(verts.getKey(),N.getKey(),((NodeData)verts).getWeight(N.getKey()));
+				connect(verts.getKey(),N.getKey(),N.getWeight());
 			}
 		}
 	}
@@ -142,6 +144,14 @@ public class DWGraph_DS implements directed_weighted_graph {
 		} 
 		else return null;
 
+	}
+	public Collection<node_data> getSrcVertices(){
+		if(src_vertices!=null){
+		return src_vertices;}
+	}
+	public Collection<node_data> getDestVertices(){
+		if(dest_vertices!=null){
+		return dest_vertices;}
 	}
 
 	public edge_data removeEdge(int src, int dest) {

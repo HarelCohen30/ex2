@@ -42,9 +42,9 @@ public class DWGraph_Algo implements dw_graph_algorithms {
 
     @Override
     public directed_weighted_graph copy() {
-        Collection<node_data> NewGraphVertices = gr.getV();
-       // Collection<node_data> NewGraphEdges = gr.getV();
-        directed_weighted_graph NewGraph = new DWGraph_DS(NewGraphVertices);
+        Collection<node_data> NewGraphSrcVertices = gr.getSrcVertices();
+        Collection<node_data> NewGraphDestVertices = gr.getDestVertices();
+        directed_weighted_graph NewGraph = new DWGraph_DS(NewGraphSrcVertices,NewGraphDestVertices);
         return NewGraph;
     }
     public void Dijkstra(node_data node)// standard Dijkstra Algo. registers all tags of nodes in src branch of graph as dist from src.
