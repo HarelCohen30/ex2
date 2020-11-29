@@ -21,7 +21,7 @@ public class DWGraph_DS implements directed_weighted_graph {
 		this.dest_vertices = new HashMap<Integer, node_data>();
 		this.GraphVertices = new ArrayList<node_data>();
 	}
-	/*
+	
 	//Maurice, Please check this constructor again/////////////////////////////
 	//constructor for the copy function creating a deep copy
 	public DWGraph_DS(Collection<node_data> NewGraphVertices) {
@@ -42,7 +42,7 @@ public class DWGraph_DS implements directed_weighted_graph {
 			}
 		}
 	}
-	 */
+	 
 
 
 	public node_data getNode(int key) {
