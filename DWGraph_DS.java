@@ -10,7 +10,8 @@ public class DWGraph_DS implements directed_weighted_graph {
 
 	private HashMap<Integer, node_data> src_vertices;
 	private HashMap<Integer, node_data> dest_vertices;
-	public Collection<node_data> GraphVertices;
+	public Collection<node_data> GraphSrcVertices;
+	public Collection<node_data> GraphDestVertices;
 	int nodeCounter = 0;
 	int edgeCounter=0;
 	int mc = 0;
@@ -19,7 +20,8 @@ public class DWGraph_DS implements directed_weighted_graph {
 	public DWGraph_DS() {
 		this.src_vertices = new HashMap<Integer, node_data>();
 		this.dest_vertices = new HashMap<Integer, node_data>();
-		this.GraphVertices = new ArrayList<node_data>();
+		this.GraphSrcVertices = new ArrayList<node_data>();
+		this.GraphDestVertices = new ArrayList<node_data>();
 	}
 	
 	//Maurice, Please check this constructor again/////////////////////////////
@@ -32,20 +34,19 @@ public class DWGraph_DS implements directed_weighted_graph {
 		for (node_data verts : GraphSrcVertices) {
 			addNode(verts);
 		}
-		this.amountOfEdges = this.getNeighbors().size();
 		for (node_data verts : GraphSrcVertices)
 		{
 			verts.setInfo(verts.getInfo());
 			verts.setTag(verts.getTag());
-			Iterator<node_data> ite = (verts.getKey().getNi).iterator();
+			Collection<node_data> col = ((NodeData) verts).getNi();
+			Iterator<node_data> ite = col.iterator();
 			while(ite.hasNext()) {
 				node_data N=ite.next();
 				connect(verts.getKey(),N.getKey(),N.getWeight());
 			}
 		}
 	}
-	 
-
+	
 
 	public node_data getNode(int key) {
 		if (src_vertices.get(key) != null)
@@ -84,6 +85,8 @@ public class DWGraph_DS implements directed_weighted_graph {
 		if(src_vertices.containsKey(src) && dest_vertices.containsKey(dest) && src!=dest ){
 			if(!hasEdge(src, dest)) {
 				((NodeData) src_vertices.get(src)).addNi(dest_vertices.get(dest));
+				((NodeData) dest_vertices.get(dest)).addNi(src_vertices.get(src));
+
 				edgeCounter++;
 				mc++;
 			}	
@@ -146,12 +149,18 @@ public class DWGraph_DS implements directed_weighted_graph {
 
 	}
 	public Collection<node_data> getSrcVertices(){
-		if(src_vertices!=null){
-		return src_vertices;}
+		if(src_vertices!=null)
+		{	
+		return src_vertices.values();
+		}
+		return null;
 	}
 	public Collection<node_data> getDestVertices(){
-		if(dest_vertices!=null){
-		return dest_vertices;}
+		if(dest_vertices!=null)
+		{
+		return dest_vertices.values();
+		}
+		return null;
 	}
 
 	public edge_data removeEdge(int src, int dest) {
