@@ -16,6 +16,10 @@ import java.util.Scanner;
 import java.io.*;
 import java.lang.*;
 
+import jdk.nashorn.internal.parser.JSONParser;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 public class DWGraph_Algo implements dw_graph_algorithms {
     int nodeCounter=0;
     HashMap<node_data,node_data> fathers;
@@ -28,7 +32,7 @@ public class DWGraph_Algo implements dw_graph_algorithms {
         fathers =new HashMap<node_data,node_data>();
     }
 
-        public directed_weighted_graph gr;
+    public directed_weighted_graph gr;
 
     @Override
     public void init(directed_weighted_graph g) {
@@ -72,8 +76,9 @@ public class DWGraph_Algo implements dw_graph_algorithms {
         {
             node_data top=que.poll();
             top.setInfo("visited");
-            Collection<node_data> Nis = gr.getV(top.getKey());
-            Nis = ((NodeData)top).getNi();
+            Collection<node_data> Nis = new ArrayList<node_data>();
+            //gr.getV(top.getKey());
+           // Nis = ((NodeData)top).getNi();
             for(node_data nex:Nis)
             {
 
@@ -85,8 +90,8 @@ public class DWGraph_Algo implements dw_graph_algorithms {
                     nex.setInfo("visiting");
                 }
                 //resets tags if smaller dist
-                if(nex.getTag()>top.getTag()+(gr.getEdge(top.getKey(), nex.getKey()))) {
-                    int n=gr.getEdge(top.getKey(), nex.getKey())+top.getTag();
+                if(nex.getTag()>top.getTag()+(gr.getEdge(top.getKey(), nex.getKey()).getTag())) {
+                    int n=gr.getEdge(top.getKey(), nex.getKey()).getTag()+top.getTag();
                     nex.setTag(n);
                     fathers.put(nex,top);
                 }
@@ -115,7 +120,8 @@ public class DWGraph_Algo implements dw_graph_algorithms {
         {
             node_data top=que.poll();
             top.setInfo("visited");
-            Collection<node_data> Nis  = gr.getV(top.getKey());
+            Collection<node_data> Nis  = new ArrayList<node_data>();
+            //gr.getV(top.getKey());
             for(node_data nex:Nis)
             {
 
@@ -178,25 +184,59 @@ public class DWGraph_Algo implements dw_graph_algorithms {
     @Override
     public boolean save(String file) {
         //	boolean flag=true;
-        try {
-            x=new Formatter(file);
+         JSONObject obj=new JSONObject();
+         JSONArray edges=new JSONArray();
+        JSONArray nodes=new JSONArray();
+        Collection<node_data> srcVertices =(DWGraph_DS) gr.getSrcVertices();
+        Iterator<node_data> ite =srcVertices.iterator();
+        while(ite.hasNext()) {
+            node_data n= ite.next();
+            Collection<node_data> destVertices = gr.getNi(n.getKey());
+            Iterator<node_data> iteN = destVertices.iterator();
+            while (ite.hasNext()) {
+                NodeData n1=(NodeData)iteN.next();
+                JSONArray list= new JSONArray();
+
+                list.add(n.getKey());
+                list.add(n1.getWeight());
+                list.add(n1.getKey());
+                edges.add(list);
+            }
+        }
+        Collection<node_data> vertices = gr.getV();
+        Iterator<node_data> ite1 =vertices.iterator();
+        while(ite1.hasNext()) {
+           node_data n= ite1.next();
+            JSONArray list1= new JSONArray();
+            list1.add(n.getLocation());
+            list1.add(n.getKey());
+            nodes.add(list1);
+        }
+            obj.put("edges",edges);
+            obj.put("nodes",nodes);
+
+        try(FileWriter f = new FileWriter(file))
+        {
+           f.write(obj.toString());
+//           x=new Formatter(file);
+//            x= streamfile(file);
         }
         catch(Exception e) {
             System.out.println("you have an error");
             return false;
         }
-        x.format("%s%s%s%s%s%s%s%s%s%s%s","amountOfNodes: ",",",gr.nodeSize(),",","amountOfEdges: ",",",gr.edgeSize(),",","mc: ",",",gr.getMC());
-        x.format("%n", "");
-        Collection<node_data> col=gr.getV();
-        for(node_data node: col) {
-            x.format("%s%s%s%s%s" ,node.getKey(),",",node.getInfo(),",",node.getTag());
-            Collection<node_data> listOfNi=((NodeData)node).getNi();
-            for(node_data nis:listOfNi) {
-                x.format("%s%s",",", nis.getKey());
-                x.format("%s%s",",", gr.getEdge(node.getKey(),nis.getKey()));
-            }
-            x.format("%n", "");
-        }
+//        x.format("%s%s%s%s%s%s%s%s%s%s%s","amountOfNodes: ",",",gr.nodeSize(),",","amountOfEdges: ",",",gr.edgeSize(),",","mc: ",",",gr.getMC());
+//        x.format("%n", "");
+//        Collection<node_data> col=gr.getV();
+//        for(node_data node: col) {
+//            x.format("%s%s%s%s%s" ,node.getKey(),",",node.getInfo(),",",node.getTag());
+//            Collection<node_data> listOfNi=((NodeData)node).getNi();
+//            for(node_data nis:listOfNi) {
+//                x.format("%s%s",",", nis.getKey());
+//                x.format("%s%s",",", gr.getEdge(node.getKey(),nis.getKey()));
+//            }
+//            x.format("%n", "");
+//        }
         x.close();
 
         return true;
@@ -205,32 +245,43 @@ public class DWGraph_Algo implements dw_graph_algorithms {
     @Override
     public boolean load(String file) {
         File f=new File(file);
+        JSONParser parser = new JSONParser();
+
         try {
-            scan = new Scanner(f);
+           Object obj= new parser.parse(new FileReader(f));
+           JSONObject jsObj=(JSONObject) obj;
+            edge_data[] edges=jsObj.get("Edges");
+            node_data[] nodes=jsObj.get("nodes");
+            directed_weighted_graph G=new DWGraph_DS();
+            for(node_data i: nodes){
+              G.addNode(i);
+            }
+            for(edge_data i:edges){
+                G.connect(i.getSrc(),i.getDest(),i.getWeight());
+            }
         } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
+
             e.printStackTrace();
         }
-        String ln=scan.nextLine();
-        String[] el=ln.split(",");
-        int vertices=Integer.parseInt(el[1]);
-        int edges=Integer.parseInt(el[3]);
-        int mcCounter=Integer.parseInt(el[5]);
-        directed_weighted_graph G=new DWGraph_DS();
-        while(scan.hasNextLine()) {
-            ln=scan.nextLine();
-            el=ln.split(",");
-            int i=0;
-            G.addNode(Integer.parseInt(el[0]));
-            node_data n=G.getNode(Integer.parseInt(el[0]));
-            n.setInfo(el[1]);
-            n.setTag(Integer.parseInt(el[2]));
-            i=3;
-            while(i<el.length) {
-                G.connect(n.getKey(),Integer.parseInt(el[i]),Double.parseDouble(el[i+1]));
-                i=i+2;
-            }
-        }
+//        String ln=scan.nextLine();
+//        String[] el=ln.split(",");
+
+       // int mcCounter=Integer.parseInt(el[5]);
+
+ //       for(node_data i: nodes) {
+//            ln=scan.nextLine();
+//            el=ln.split(",");
+//            int i=0;
+//            G.addNode(i.getKey());
+//            node_data n=G.getNode(Integer.parseInt(el[0]));
+//            n.setInfo(el[1]);
+//            n.setTag(Integer.parseInt(el[2]));
+//            i=3;
+//            while(i<el.length) {
+//                G.connect(n.getKey(),Integer.parseInt(el[i]),Double.parseDouble(el[i+1]));
+//                i=i+2;
+//            }
+//        }
         scan.close();
         gr=G;
 
@@ -240,5 +291,5 @@ public class DWGraph_Algo implements dw_graph_algorithms {
         }
         else return false;
     }
-    }
+}
 
